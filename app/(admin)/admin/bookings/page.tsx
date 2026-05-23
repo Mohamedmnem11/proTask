@@ -77,7 +77,7 @@ export default function AdminBookingsPage() {
       const data = await api.getBookings()
       const bookingsList = data.bookings || []
       setBookings(bookingsList)
-      
+
       // حساب الإحصائيات
       const today = new Date().toISOString().split('T')[0]
       const stats = {
@@ -100,7 +100,7 @@ export default function AdminBookingsPage() {
 
   async function handleCancelBooking(id: string) {
     if (!confirm('هل أنت متأكد من إلغاء هذا الحجز؟')) return
-    
+
     try {
       await api.cancelBooking(id)
       await fetchBookings() // إعادة تحميل البيانات
@@ -112,21 +112,21 @@ export default function AdminBookingsPage() {
   // فلترة الحجوزات
   const filteredBookings = bookings.filter(booking => {
     // فلترة حسب البحث
-    const matchesSearch = 
+    const matchesSearch =
       booking.fieldName?.includes(searchTerm) ||
       booking.userName?.includes(searchTerm) ||
       booking.fieldLocation?.includes(searchTerm)
-    
+
     // فلترة حسب الحالة
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter
-    
+
     // فلترة حسب التاريخ
     const today = new Date().toISOString().split('T')[0]
     const matchesDate = dateFilter === 'all' ? true :
       dateFilter === 'today' ? booking.date === today :
-      dateFilter === 'upcoming' ? booking.date > today :
-      dateFilter === 'past' ? booking.date < today : true
-    
+        dateFilter === 'upcoming' ? booking.date > today :
+          dateFilter === 'past' ? booking.date < today : true
+
     return matchesSearch && matchesStatus && matchesDate
   })
 
@@ -274,13 +274,13 @@ export default function AdminBookingsPage() {
                             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                               <Calendar className="w-6 h-6 text-blue-600" />
                             </div>
-                            
+
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="text-lg font-bold">{booking.fieldName}</h3>
-                                <Badge variant={
-                                  booking.status === 'confirmed' ? 'success' :
-                                  booking.status === 'completed' ? 'secondary' : 'destructive'
+                                <Badge className={
+                                  booking.status === 'confirmed' ? 'bg-green-600 text-white hover:bg-green-700' :
+                                    booking.status === 'completed' ? 'bg-gray-500 text-white' : 'bg-red-600 text-white'
                                 }>
                                   {booking.status === 'confirmed' && 'مؤكد'}
                                   {booking.status === 'completed' && 'منتهي'}
@@ -336,10 +336,10 @@ export default function AdminBookingsPage() {
                                 تفاصيل
                               </Button>
                             </Link>
-                            
+
                             {booking.status === 'confirmed' && (
-                              <Button 
-                                variant="destructive" 
+                              <Button
+                                variant="destructive"
                                 size="sm"
                                 onClick={() => handleCancelBooking(booking._id)}
                               >

@@ -124,7 +124,7 @@ await db.collection('matches').updateOne(
         status: 'pending'
       }
     }
-  }
+  } as any
 )
 
 // ✅ إضافة إشعار للمنشئ - المهم هنا

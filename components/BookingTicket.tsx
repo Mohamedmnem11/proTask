@@ -89,7 +89,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 
 // ── Convert canvas → PDF via jsPDF ──────────────────────────
 async function savePDF(canvas: HTMLCanvasElement, filename: string) {
-  const { jsPDF } = await import('jspdf')
+const { default: jsPDF } = await import('jspdf')
   const img = canvas.toDataURL('image/jpeg', 0.95)
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pw = pdf.internal.pageSize.getWidth()

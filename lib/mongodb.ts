@@ -1,25 +1,27 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient, MongoClientOptions } from 'mongodb'
 
-const uri = process.env.MONGODB_URI
-const options = {}
+const uri = process.env.MONGODB_URI as string
+const options: MongoClientOptions = {}
 
-let client
-let clientPromise
-
-if (!process.env.MONGODB_URI) {
+if (!uri) {
   throw new Error('Please add your Mongo URI to .env.local')
 }
 
+// تخزين الاتصال في globalThis في وضع التطوير فقط
+const globalWithMongo = globalThis as typeof globalThis & {
+  _mongoClientPromise?: Promise<MongoClient>
+}
+
+let clientPromise: Promise<MongoClient>
+
 if (process.env.NODE_ENV === 'development') {
-  // In development, use a global variable so the connection is preserved across module reloads
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options)
-    global._mongoClientPromise = client.connect()
+  if (!globalWithMongo._mongoClientPromise) {
+    const client = new MongoClient(uri, options)
+    globalWithMongo._mongoClientPromise = client.connect()
   }
-  clientPromise = global._mongoClientPromise
+  clientPromise = globalWithMongo._mongoClientPromise
 } else {
-  // In production, it's best to not use a global variable
-  client = new MongoClient(uri, options)
+  const client = new MongoClient(uri, options)
   clientPromise = client.connect()
 }
 

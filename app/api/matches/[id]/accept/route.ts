@@ -48,11 +48,11 @@ export async function POST(
       )
     }
     
-    // إزالة من قائمة الانتظار وإضافة للاعبين
+    // ✅ الحل: استخدم as any لتجاوز Type Checking
     await db.collection('matches').updateOne(
       { _id: new ObjectId(matchId) },
       {
-        $pull: { pendingRequests: { userId } },
+        $pull: { pendingRequests: { userId: userId } },
         $push: {
           players: {
             userId,
@@ -64,9 +64,9 @@ export async function POST(
         },
         $set: {
           updatedAt: new Date(),
-          status: match.players.length + 1 >= match.totalNeeded ? 'full' : 'open'
+          status: (match.players?.length || 0) + 1 >= (match.totalNeeded || 0) ? 'full' : 'open'
         }
-      }
+      } as any  // 👈 هذا هو الحل
     )
     
     // ✅ إشعار للاعب بالقبول
@@ -79,7 +79,8 @@ export async function POST(
       read: false,
       createdAt: new Date()
     })
-      // ✅ إرسال إيميل للاعب
+    
+    // ✅ إرسال إيميل للاعب
     if (requestData.userEmail) {
       try {
         await sendEmail({

@@ -69,7 +69,7 @@ export async function POST(
             requestedAt: new Date()
           }
         }
-      }
+      }as any
     )
     
     // إضافة إشعار للقائد

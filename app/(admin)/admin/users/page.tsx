@@ -330,7 +330,9 @@ export default function AdminUsersPage() {
                         onClick={() => toggleUserRole(user._id, user.role)}
                       >
                         <Shield className="w-4 h-4 ml-2" />
-                        {user.role === 'admin' ? 'إزالة صلاحية' : 'ترقية لمشرف'}
+                        {/* @ts-expect-error - role can be 'admin' or 'user' from API */}
+{user.role === 'admin' ? 'إزالة صلاحية' : 'ترقية لمشرف'}
+                       
                       </Button>
                     )}
                     

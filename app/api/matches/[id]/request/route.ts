@@ -1,113 +1,154 @@
 import { NextResponse } from 'next/server'
+import { auth } from '@/auth'
 import clientPromise from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
-    const client = await clientPromise
-    const db = client.db('booking')
-    const body = await request.json()
-    const { userId, userName } = body
+    // 1. التحقق من المصادقة
+    const session = await auth()
     
-    console.log('📢 Request join:', { matchId: id, userId, userName })
-    
-    if (!ObjectId.isValid(id) || !ObjectId.isValid(userId)) {
+    if (!session || !session.user) {
       return NextResponse.json(
-        { success: false, error: 'معرف غير صالح' },
+        { success: false, error: 'غير مصرح. يرجى تسجيل الدخول' },
+        { status: 401 }
+      )
+    }
+
+    // 2. جلب الـ id من params (باستخدام await)
+    const { id } = await params
+
+    // 3. التحقق من صحة الـ id
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: 'معرّف المباراة غير صالح' },
         { status: 400 }
       )
     }
-    
-    // جلب المباراة
+
+    // 4. الاتصال بقاعدة البيانات
+    const client = await clientPromise
+    const db = client.db('booking')
+
+    // 5. جلب بيانات المباراة
     const match = await db.collection('matches').findOne({
       _id: new ObjectId(id)
     })
-    
+
     if (!match) {
       return NextResponse.json(
         { success: false, error: 'المباراة غير موجودة' },
         { status: 404 }
       )
     }
-    
-    // التحقق من حالة المباراة
-    if (match.status !== 'open') {
-      return NextResponse.json(
-        { success: false, error: 'المباراة غير متاحة للانضمام' },
-        { status: 400 }
-      )
-    }
-    
-    // التحقق من عدم وجود طلب سابق
-    const alreadyRequested = match.pendingRequests?.some(
-      (r: any) => r.userId === userId
-    )
-    
-    if (alreadyRequested) {
-      return NextResponse.json(
-        { success: false, error: 'لديك طلب انتظار بالفعل' },
-        { status: 400 }
-      )
-    }
-    
-    // التحقق من عدم الانضمام المسبق
-    const alreadyJoined = match.players?.some(
-      (p: any) => p.userId === userId
-    )
-    
-    if (alreadyJoined) {
-      return NextResponse.json(
-        { success: false, error: 'أنت منضم بالفعل لهذه المباراة' },
-        { status: 400 }
-      )
-    }
-    
-    // جلب بيانات المستخدم كاملة
+
+    // 6. جلب بيانات المستخدم
     const user = await db.collection('users').findOne({
-      _id: new ObjectId(userId)
+      email: session.user.email
     })
-    
+
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'المستخدم غير موجود' },
         { status: 404 }
       )
     }
-    
-    // إضافة طلب الانتظار
-    await db.collection('matches').updateOne(
-      { _id: new ObjectId(id) },
-      {
-        $push: {
-          pendingRequests: {
-            userId,
-            userName: user.name,
-            userPhone: user.phone || '',
-            userEmail: user.email,
-            requestedAt: new Date(),
-            status: 'pending'
-          }
-        }
-      }
-    )
-    
+
+    // 7. التحقق من عدم وجود طلب مسبق
+    const existingRequest = await db.collection('requests').findOne({
+      matchId: id,
+      userId: user._id.toString(),
+      status: { $in: ['pending', 'approved'] }
+    })
+
+    if (existingRequest) {
+      return NextResponse.json(
+        { success: false, error: 'لديك طلب سابق لهذه المباراة لا يزال قيد المعالجة' },
+        { status: 400 }
+      )
+    }
+
+    // 8. إنشاء طلب جديد
+    const newRequest = {
+      matchId: id,
+      userId: user._id.toString(),
+      userName: user.name,
+      userEmail: user.email,
+      matchTitle: match.title,
+      matchDate: match.date,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    const result = await db.collection('requests').insertOne(newRequest)
+
+    // 9. إرجاع النتيجة
     return NextResponse.json({
       success: true,
-      message: 'تم إرسال طلب الانضمام بنجاح'
+      message: 'تم إرسال طلب الانضمام بنجاح',
+      requestId: result.insertedId.toString(),
+      request: {
+        ...newRequest,
+        _id: result.insertedId.toString()
+      }
     })
-    
+
   } catch (error) {
-    console.error('❌ Error in request join:', error)
+    console.error('❌ Error in match request API:', error)
+    
     return NextResponse.json(
       { 
         success: false, 
-        error: 'حدث خطأ في إرسال الطلب',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'حدث خطأ داخلي في الخادم. يرجى المحاولة مرة أخرى لاحقاً' 
       },
+      { status: 500 }
+    )
+  }
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: 'غير مصرح' },
+        { status: 401 }
+      )
+    }
+
+    const { id } = await params
+
+    const client = await clientPromise
+    const db = client.db('booking')
+
+    // جلب جميع طلبات هذه المباراة
+    const requests = await db.collection('requests')
+      .find({ matchId: id })
+      .sort({ createdAt: -1 })
+      .toArray()
+
+    const formattedRequests = requests.map(req => ({
+      ...req,
+      _id: req._id.toString()
+    }))
+
+    return NextResponse.json({
+      success: true,
+      requests: formattedRequests
+    })
+
+  } catch (error) {
+    console.error('❌ Error fetching requests:', error)
+    return NextResponse.json(
+      { success: false, error: 'حدث خطأ في جلب الطلبات' },
       { status: 500 }
     )
   }

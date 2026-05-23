@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import clientPromise from '@/lib/mongodb'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/auth'
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
+    
     if (!session) {
       return NextResponse.json(
         { success: false, error: 'غير مصرح' },
@@ -18,7 +18,7 @@ export async function GET() {
 
     // جلب المستخدم من الجلسة
     const user = await db.collection('users').findOne({ 
-      email: session.user.email 
+      email: session.user?.email 
     })
 
     if (!user) {

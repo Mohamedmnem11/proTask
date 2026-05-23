@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { 
-  Users, 
-  CalendarDays, 
+import {
+  Users,
+  CalendarDays,
   Trophy,
   MapPin,
   Clock,
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
   async function loadDashboardData() {
     try {
       setLoading(true)
-      
+
       // جلب كل البيانات من APIs حقيقية
       const [usersRes, fieldsRes, bookingsRes, matchesRes] = await Promise.all([
         fetch('/api/admin/users').then(res => res.json()),
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
       const confirmedBookings = bookings.filter((b: any) => b.status === 'confirmed').length
       const cancelledBookings = bookings.filter((b: any) => b.status === 'cancelled').length
       const pendingBookings = bookings.filter((b: any) => b.status === 'pending').length
-      
+
       // حساب الإيرادات (لو في سعر)
       const totalRevenue = bookings
         .filter((b: any) => b.status === 'confirmed')
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
         recentUsers: users.slice(0, 5),
         recentMatches: matches.slice(0, 5)
       })
-      
+
     } catch (error) {
       console.error('Error loading dashboard:', error)
     } finally {
@@ -451,14 +451,19 @@ export default function AdminDashboard() {
                         <span>{booking.startTime}</span>
                       </div>
                     </div>
-                    <Badge variant={
-                      booking.status === 'confirmed' ? 'success' : 
-                      booking.status === 'cancelled' ? 'destructive' : 
-                      'secondary'
-                    }>
-                      {booking.status === 'confirmed' ? 'مؤكد' : 
-                       booking.status === 'cancelled' ? 'ملغي' : 
-                       'معلق'}
+                    <Badge
+                      variant={
+                        booking.status === 'confirmed' ? 'default' :
+                          booking.status === 'cancelled' ? 'destructive' :
+                            'secondary'
+                      }
+                      className={
+                        booking.status === 'confirmed' ? 'bg-green-600 hover:bg-green-700' : ''
+                      }
+                    >
+                      {booking.status === 'confirmed' ? 'مؤكد' :
+                        booking.status === 'cancelled' ? 'ملغي' :
+                          'معلق'}
                     </Badge>
                   </div>
                 ))}
@@ -487,9 +492,12 @@ export default function AdminDashboard() {
                 <div key={match._id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-bold">{match.fieldName}</h4>
-                    <Badge variant={match.status === 'open' ? 'success' : 'secondary'}>
-                      {match.status === 'open' ? 'مفتوحة' : 
-                       match.status === 'full' ? 'مكتملة' : 'منتهية'}
+                    <Badge
+                      variant={match.status === 'open' ? 'default' : 'secondary'}
+                      className={match.status === 'open' ? 'bg-green-600 hover:bg-green-700' : ''}
+                    >
+                      {match.status === 'open' ? 'مفتوحة' :
+                        match.status === 'full' ? 'مكتملة' : 'منتهية'}
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{match.creatorName}</p>

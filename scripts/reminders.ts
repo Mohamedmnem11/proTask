@@ -1,8 +1,8 @@
-// scripts/reminders.js
+// scripts/reminders.ts
 // شغله كل يوم بـ cron job
 
-const { MongoClient } = require('mongodb')
-const fetch = require('node-fetch')
+import { MongoClient } from 'mongodb'
+import 'dotenv/config'
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/booking'
 
@@ -71,4 +71,5 @@ async function sendReminders() {
   }
 }
 
-sendReminders()
+// تشغيل الدالة
+sendReminders().catch(console.error)

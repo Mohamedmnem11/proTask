@@ -217,8 +217,10 @@ export async function POST(request: Request) {
 
         // ── إيميلات (non-blocking) ─────────────────────
         broadcastMatchEmails(
-          allUsers.filter(u => u.email),
-          {
+          allUsers
+  .filter((u: any) => u?.email && u?.name)
+  .map((u: any) => ({ email: u.email, name: u.name }))
+          ,{
             creatorName:   creator.name,
             fieldName:     field.name,
             fieldLocation: field.location || '',

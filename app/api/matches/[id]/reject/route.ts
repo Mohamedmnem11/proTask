@@ -54,7 +54,7 @@ export async function POST(
       {
         $pull: { pendingRequests: { userId } },
         $set: { updatedAt: new Date() }
-      }
+      }as any,
     )
     
     // ✅ إشعار للاعب بالرفض
