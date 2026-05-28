@@ -7,7 +7,6 @@ if (!uri) {
   throw new Error('Please add your Mongo URI to .env.local')
 }
 
-// تخزين الاتصال في globalThis في وضع التطوير فقط
 const globalWithMongo = globalThis as typeof globalThis & {
   _mongoClientPromise?: Promise<MongoClient>
 }

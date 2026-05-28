@@ -7,13 +7,11 @@ export async function GET(request: Request) {
     const client = await clientPromise
     const db = client.db('booking')
     
-    // جلب كل المستخدمين
     const users = await db.collection('users')
       .find({})
       .sort({ createdAt: -1 })
       .toArray()
     
-    // جلب عدد حجوزات كل مستخدم
     const usersWithStats = await Promise.all(users.map(async (user) => {
       const bookingsCount = await db.collection('bookings').countDocuments({
         userId: user._id.toString(),
@@ -38,10 +36,7 @@ export async function GET(request: Request) {
       }
     }))
     
-    return NextResponse.json({
-      success: true,
-      users: usersWithStats
-    })
+    return NextResponse.json({ success: true, users: usersWithStats })
     
   } catch (error) {
     console.error('Error fetching users:', error)
