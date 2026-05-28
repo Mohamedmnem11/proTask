@@ -1,19 +1,8 @@
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   /* config options here */
-// };
-
-// export default nextConfig;
-
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: true,
   compress: true,
   poweredByHeader: false,
-  
-  // تسريع الـ compilation
+
   experimental: {
     optimizePackageImports: [
       'lucide-react',
@@ -26,6 +15,16 @@ const nextConfig = {
       '@radix-ui/react-avatar',
     ],
   },
-}
 
-module.exports = nextConfig
+  // إعادة توجيه طلبات API إلى الخادم الخلفي
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:8080/api/:path*', // غيّر العنوان حسب إعدادات Backend
+      },
+    ];
+  },
+};
+
+module.exports = nextConfig;

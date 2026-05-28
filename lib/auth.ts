@@ -1,8 +1,6 @@
-import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { DefaultSession } from "next-auth"
+import { NextAuthOptions, DefaultSession, getServerSession } from "next-auth"
 
-// ✅ إضافة types للـ role
 declare module "next-auth" {
   interface User {
     role?: string
@@ -17,23 +15,11 @@ declare module "next-auth" {
 }
 
 const mockUsers = [
-  {
-    id: "1",
-    name: "أحمد محمد",
-    email: "ahmed@example.com",
-    password: "123456",
-    role: "user"
-  },
-  {
-    id: "2",
-    name: "محمد علي",
-    email: "admin@example.com",
-    password: "admin123",
-    role: "admin"
-  }
+  { id: "1", name: "أحمد محمد", email: "ahmed@example.com", password: "123456", role: "user" },
+  { id: "2", name: "محمد علي", email: "admin@example.com", password: "admin123", role: "admin" }
 ]
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -42,21 +28,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "كلمة المرور", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
-        const user = mockUsers.find(user => user.email === credentials.email)
-
+        if (!credentials?.email || !credentials?.password) return null
+        const user = mockUsers.find(u => u.email === credentials.email)
         if (user && user.password === credentials.password) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role
-          }
+          return { id: user.id, name: user.name, email: user.email, role: user.role }
         }
-
         return null
       }
     })
@@ -77,10 +53,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     }
   },
-  pages: {
-    signIn: "/login",
-  },
-  session: {
-    strategy: "jwt"
-  },
-})
+  pages: { signIn: "/login" },
+  session: { strategy: "jwt" }
+}
+
+// ✅ هنا بنعمل wrapper عشان الملفات التانية تقدر تعمل import { auth }
+export const auth = () => getServerSession(authOptions)

@@ -191,13 +191,13 @@ export default function ProfilePage() {
                   <Label htmlFor="email">البريد الإلكتروني</Label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={user?.email}
-                      disabled
-                      className="pr-9 bg-gray-50"
-                    />
+                  <Input
+  id="email"
+  type="email"
+  value={user?.email ?? ''}
+  disabled
+  className="pr-9 bg-gray-50"
+/>
                   </div>
                   <p className="text-xs text-gray-500">
                     لا يمكن تغيير البريد الإلكتروني
