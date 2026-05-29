@@ -1,23 +1,27 @@
-import { MongoClient } from 'mongodb'
-import bcrypt from 'bcryptjs'
-import * as dotenv from 'dotenv'
-import path from 'path'
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcryptjs';
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-// تحميل المتغيرات من ملف .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-console.log('✅ MONGODB_URI from env:', process.env.MONGODB_URI)
+// تأكد من وجود MONGODB_URI (استخدم قيمة افتراضية إذا لزم الأمر)
+const MONGODB_URI = process.env.MONGODB_URI ||'mongodb://mmnem0553_db_user:pir5Zg7NGabezWNL@ac-q2cogty-shard-00-00.iz7raxb.mongodb.net:27017,ac-q2cogty-shard-00-01.iz7raxb.mongodb.net:27017,ac-q2cogty-shard-00-02.iz7raxb.mongodb.net:27017/booking?ssl=true&replicaSet=atlas-9phvwa-shard-0&authSource=admin';
 
-const MONGODB_URI = process.env.MONGODB_URI 
+
+console.log('✅ MONGODB_URI from env:', MONGODB_URI);
 
 async function seed() {
   try {
-    console.log('🔌 Connecting to MongoDB...')
-    const client = new MongoClient(MONGODB_URI)
-    await client.connect()
-    console.log('✅ Connected to MongoDB')
+    console.log('🔌 Connecting to MongoDB...');
+    const client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    console.log('✅ Connected to MongoDB');
     
-    const db = client.db('booking')
+    const db = client.db('booking');
+// تحميل المتغيرات من ملف .env.local
+
+
     
     // مسح البيانات القديمة
     await db.collection('fields').deleteMany({})
