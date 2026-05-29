@@ -31,7 +31,8 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 export const api = {
   // Fields
   getFields: () => fetchAPI('/fields'),
-  getField: (id: string) => fetchAPI(`/fields/${id}`),
+  // getField: (id: string) => fetchAPI(`/fields/${id}`),
+getField: (id: string) => fetchAPI(`/fields?id=${id}`),
   createField: (data: any) => fetchAPI('/fields', { method: 'POST', body: JSON.stringify(data) }),
   updateField: (id: string, data: any) => fetchAPI(`/fields/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteField: (id: string) => fetchAPI(`/fields/${id}`, { method: 'DELETE' }),

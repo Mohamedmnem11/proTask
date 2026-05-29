@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
-console.log('🔗 Using MONGODB_URI:', MONGODB_URI); // <-- أضف هذا
 
 if (!MONGODB_URI) {
   throw new Error('❌ MONGODB_URI غير موجود في ملف .env');
