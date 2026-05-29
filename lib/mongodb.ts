@@ -1,27 +1,24 @@
-import { MongoClient, MongoClientOptions } from 'mongodb'
+import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI as string
-const options: MongoClientOptions = {}
+const uri = process.env.MONGODB_URI as string || 'mongodb://mmnem0553_db_user:pir5Zg7NGabezWNL@ac-q2cogty-shard-00-00.iz7raxb.mongodb.net:27017,ac-q2cogty-shard-00-01.iz7raxb.mongodb.net:27017,ac-q2cogty-shard-00-02.iz7raxb.mongodb.net:27017/booking?ssl=true&replicaSet=atlas-9phvwa-shard-0&authSource=admin';
+if (!uri) throw new Error('MONGODB_URI missing');
 
-if (!uri) {
-  throw new Error('Please add your Mongo URI to .env.local')
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
+
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
-
-const globalWithMongo = globalThis as typeof globalThis & {
-  _mongoClientPromise?: Promise<MongoClient>
-}
-
-let clientPromise: Promise<MongoClient>
 
 if (process.env.NODE_ENV === 'development') {
-  if (!globalWithMongo._mongoClientPromise) {
-    const client = new MongoClient(uri, options)
-    globalWithMongo._mongoClientPromise = client.connect()
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri);
+    global._mongoClientPromise = client.connect();
   }
-  clientPromise = globalWithMongo._mongoClientPromise
+  clientPromise = global._mongoClientPromise;
 } else {
-  const client = new MongoClient(uri, options)
-  clientPromise = client.connect()
+  client = new MongoClient(uri);
+  clientPromise = client.connect();
 }
 
-export default clientPromise
+export default clientPromise;
