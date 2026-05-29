@@ -8,7 +8,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 
 console.log('✅ MONGODB_URI from env:', process.env.MONGODB_URI)
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/booking'
+const MONGODB_URI = process.env.MONGODB_URI 
 
 async function seed() {
   try {

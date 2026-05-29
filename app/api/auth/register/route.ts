@@ -108,3 +108,70 @@ export async function POST(request: Request) {
     )
   }
 }
+
+// import { NextRequest, NextResponse } from 'next/server';
+// import bcrypt from 'bcryptjs';
+// import dbConnect from '@/lib/dbConnect';
+// import User from '@/models/User';
+
+// export async function POST(req: NextRequest) {
+//   try {
+//     // 1. تأكد من الاتصال بقاعدة البيانات
+//     await dbConnect();
+
+//     // 2. قراءة البيانات المرسلة
+//     const body = await req.json();
+//     const { name, email, password, phone } = body;
+
+//     // 3. التحقق من وجود البيانات الأساسية
+//     if (!name || !email || !password) {
+//       return NextResponse.json(
+//         { error: 'الاسم والبريد الإلكتروني وكلمة المرور مطلوبة' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // 4. التحقق من أن البريد الإلكتروني غير مستخدم بالفعل
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return NextResponse.json(
+//         { error: 'البريد الإلكتروني مسجل مسبقاً' },
+//         { status: 400 }
+//       );
+//     }
+
+//     // 5. تشفير كلمة المرور
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // 6. إنشاء المستخدم الجديد
+//     const newUser = await User.create({
+//       name,
+//       email,
+//       password: hashedPassword,
+//       phone: phone || '',
+//       role: 'user',      // أو 'student' حسب احتياجك
+//       createdAt: new Date(),
+//     });
+
+//     // 7. إرجاع بيانات المستخدم (بدون كلمة المرور)
+//     return NextResponse.json(
+//       {
+//         success: true,
+//         user: {
+//           id: newUser._id,
+//           name: newUser.name,
+//           email: newUser.email,
+//           phone: newUser.phone,
+//           role: newUser.role,
+//         },
+//       },
+//       { status: 201 }
+//     );
+//   } catch (error: any) {
+//     console.error('❌ Registration error:', error);
+//     return NextResponse.json(
+//       { error: error.message || 'حدث خطأ في الخادم' },
+//       { status: 500 }
+//     );
+//   }
+// }

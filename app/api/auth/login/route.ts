@@ -39,12 +39,13 @@ export async function POST(request: Request) {
     }
     
     // التحقق من أن الحساب نشط
-    if (!user.isActive) {
-      return NextResponse.json(
-        { success: false, error: 'هذا الحساب معطل' },
-        { status: 403 }
-      )
-    }
+  // التحقق من أن الحساب نشط (إذا كان الحقل موجوداً وقيمته false فقط)
+if (user.isActive === false) {
+  return NextResponse.json(
+    { success: false, error: 'هذا الحساب معطل' },
+    { status: 403 }
+  )
+}
     
     // إزالة كلمة المرور من البيانات المرتجعة
     const { password, ...userWithoutPassword } = user
